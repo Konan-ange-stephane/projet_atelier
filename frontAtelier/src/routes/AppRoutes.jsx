@@ -1,35 +1,35 @@
 // src/routes/AppRoutes.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import Loader from '../components/Loader';
+import Chargeur from '../components/Chargeur';
 
 // Pages publiques
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
+import Accueil from '../pages/Accueil';
+import Connexion from '../pages/Connexion';
+import Inscription from '../pages/Inscription';
 
 // Pages client
-import ClientReservations from '../pages/Client/Reservations';
-import ClientTrips from '../pages/Client/Trips';
+import ClientReservations from '../pages/clients/Reservations';
+import ClientTrajets from '../pages/clients/Trajets';
 
 // Pages agent
-import AgentManageTrips from '../pages/Agent/ManageTrips';
-import AgentPassengers from '../pages/Agent/Passengers';
+import AgentGererTrajets from '../pages/agents/GererTrajets';
+import AgentPassagers from '../pages/agents/Passagers';
 
 // Pages admin
-import AdminUsers from '../pages/Admin/Users';
-import AdminStatistics from '../pages/Admin/Statistics';
+import AdminUtilisateurs from '../pages/admin/Utilisateurs';
+import AdminStatistiques from '../pages/admin/Statistiques';
 
 // Composant de route protégée
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <Loader fullScreen />;
+    return <Chargeur fullScreen />;
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/connexion" />;
   }
 
   if (roles.length > 0 && !roles.includes(user.role)) {
@@ -43,9 +43,9 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Routes publiques */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/" element={<Accueil />} />
+      <Route path="/connexion" element={<Connexion />} />
+      <Route path="/inscription" element={<Inscription />} />
 
       {/* Routes client */}
       <Route 
@@ -57,46 +57,46 @@ const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/client/trips" 
+        path="/client/trajets" 
         element={
           <ProtectedRoute roles={['CLIENT', 'ADMIN']}>
-            <ClientTrips />
+            <ClientTrajets />
           </ProtectedRoute>
         } 
       />
 
       {/* Routes agent */}
       <Route 
-        path="/agent/trips" 
+        path="/agent/trajets" 
         element={
           <ProtectedRoute roles={['AGENT', 'ADMIN']}>
-            <AgentManageTrips />
+            <AgentGererTrajets />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/agent/passengers" 
+        path="/agent/passagers" 
         element={
           <ProtectedRoute roles={['AGENT', 'ADMIN']}>
-            <AgentPassengers />
+            <AgentPassagers />
           </ProtectedRoute>
         } 
       />
 
       {/* Routes admin */}
       <Route 
-        path="/admin/users" 
+        path="/admin/utilisateurs" 
         element={
           <ProtectedRoute roles={['ADMIN']}>
-            <AdminUsers />
+            <AdminUtilisateurs />
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/admin/statistics" 
+        path="/admin/statistiques" 
         element={
           <ProtectedRoute roles={['ADMIN']}>
-            <AdminStatistics />
+            <AdminStatistiques />
           </ProtectedRoute>
         } 
       />
