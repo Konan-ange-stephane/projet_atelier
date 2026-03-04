@@ -2,6 +2,9 @@
 import axios from 'axios';
 import { API_BASE_URL, TOKEN_KEY, USER_KEY } from '../config';
 
+// Mode développement : mettre à true pour simuler l'authentification
+const MODE_DEV = true;
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -28,27 +31,72 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      window.location.href = '/login';
+      window.location.href = '/connexion';
     }
     return Promise.reject(error);
   }
 );
 
+// Fonction pour simuler un délai (comme une vraie requête API)
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const authService = {
   // Connexion
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    if (response.data.token) {
-      localStorage.setItem(TOKEN_KEY, response.data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
+    if (MODE_DEV) {
+      // MODE DÉVELOPPEMENT - Simulation
+      await delay(500); // Simuler le délai réseau
+      
+      // Simuler une vérification simple
+      if (credentials.email && credentials.password) {
+        const fakeUser = {
+          id: 1,
+          nom: 'Test User',
+          email: credentials.email,
+          role: 'CLIENT'
+        };
+        const fakeToken = 'fake-jwt-token-' + Date.now();
+        
+        localStorage.setItem(TOKEN_KEY, fakeToken);
+        localStorage.setItem(USER_KEY, JSON.stringify(fakeUser));
+        
+        return { token: fakeToken, user: fakeUser };
+      } else {
+        throw new Error('Email ou mot de passe invalide');
+      }
+    } else {
+      // MODE PRODUCTION - Vraie API
+      const response = await api.post('/auth/login', credentials);
+      if (response.data.token) {
+        localStorage.setItem(TOKEN_KEY, response.data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
+      }
+      return response.data;
     }
-    return response.data;
   },
 
   // Inscription
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    if (MODE_DEV) {
+      // MODE DÉVELOPPEMENT - Simulation
+      await delay(500);
+      
+      if (userData.email && userData.password && userData.nom) {
+        return { 
+          message: 'Inscription réussie',
+          user: {
+            nom: userData.nom,
+            email: userData.email
+          }
+        };
+      } else {
+        throw new Error('Données invalides');
+      }
+    } else {
+      // MODE PRODUCTION - Vraie API
+      const response = await api.post('/auth/register', userData);
+      return response.data;
+    }
   },
 
   // Déconnexion
@@ -75,11 +123,18 @@ export const authService = {
 
   // Rafraîchir le token
   refreshToken: async () => {
-    const response = await api.post('/auth/refresh-token');
-    if (response.data.token) {
-      localStorage.setItem(TOKEN_KEY, response.data.token);
+    if (MODE_DEV) {
+      await delay(300);
+      const fakeToken = 'fake-jwt-token-refreshed-' + Date.now();
+      localStorage.setItem(TOKEN_KEY, fakeToken);
+      return { token: fakeToken };
+    } else {
+      const response = await api.post('/auth/refresh-token');
+      if (response.data.token) {
+        localStorage.setItem(TOKEN_KEY, response.data.token);
+      }
+      return response.data;
     }
-    return response.data;
   }
 };
 

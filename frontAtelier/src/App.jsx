@@ -5,10 +5,7 @@ import { AuthProvider } from './contexte/ContexteAuth';
 import AppRoutes from './routes/AppRoutes';
 import './App.css';
 
-/**
- * Composant principal de l'application SmartTrip
- * Configure les routes et les contextes globaux
- */
+
 function App() {
   return (
     <Routeur>
