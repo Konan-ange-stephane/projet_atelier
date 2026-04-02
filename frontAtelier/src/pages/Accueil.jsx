@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getPostLoginPath } from '../utils/postLoginRedirect';
 import BarreNav from '../components/BarreNav';
 import PiedPage from '../components/PiedPage';
 
@@ -80,12 +81,7 @@ const Accueil = () => {
 
   useEffect(() => {
     if (user) {
-      const routes = {
-        ADMIN: '/admin/statistics',
-        AGENT: '/agent/trips',
-        CLIENT: '/client/trajets'
-      };
-      naviguer(routes[user.role] || '/');
+      naviguer(getPostLoginPath(user.role));
     }
   }, [user, naviguer]);
 
@@ -315,7 +311,7 @@ const Accueil = () => {
             Une plateforme pour tous
           </h2>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-12 sm:mb-16 max-w-2xl mx-auto">
-            Que vous soyez voyageur ou professionnel, SmartTrip s'adapte à vos besoins
+            Réservez en tant que voyageur, ou connectez-vous à l’espace agent si votre organisation vous a créé un compte.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
             
@@ -357,8 +353,10 @@ const Accueil = () => {
                 <span className="bg-cyan-accent/20 text-cyan-accent px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold inline-block">
                   Partenaire
                 </span>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-3 sm:mt-4 mb-3 sm:mb-4">Je suis un Agent</h3>
-                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 italic">"Je souhaite gérer mes trajets et véhicules."</p>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-3 sm:mt-4 mb-3 sm:mb-4">Espace agent</h3>
+                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 italic">
+                  Compte fourni par l’administrateur — connexion uniquement.
+                </p>
                 <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                   <li className="flex items-start">
                     <span className="mr-2 text-cyan-accent">✓</span>
@@ -375,11 +373,11 @@ const Accueil = () => {
                 </ul>
               </div>
               <Link 
-                to="/inscription" 
+                to="/espace-agent" 
                 className="w-full text-center py-3 sm:py-4 bg-cyan-accent text-bleu-nuit rounded-xl font-bold hover:bg-white transition transform hover:scale-105 text-sm sm:text-base"
-                aria-label="Gérer ma flotte en tant qu'agent"
+                aria-label="Informations espace agent et connexion"
               >
-                Gérer ma flotte
+                Accéder à l’espace agent
               </Link>
             </div>
 

@@ -8,6 +8,7 @@ import Chargeur from '../components/Chargeur';
 import Accueil from '../pages/Accueil';
 import Connexion from '../pages/Connexion';
 import Inscription from '../pages/Inscription';
+import EspaceAgent from '../pages/EspaceAgent';
 
 // Pages client
 import ClientRoutes from "./ClientRoutes";
@@ -30,6 +31,7 @@ const AppRoutes = () => (
     <Route path="/" element={<Accueil />} />
     <Route path="/connexion" element={<Connexion />} />
     <Route path="/inscription" element={<Inscription />} />
+    <Route path="/espace-agent" element={<EspaceAgent />} />
 
     {/* Toutes les routes client sous /client/* */}
     <Route

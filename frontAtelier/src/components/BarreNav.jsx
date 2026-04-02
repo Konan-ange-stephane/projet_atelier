@@ -24,7 +24,7 @@ const BarreNav = () => {
               to="/inscription" 
               className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
             >
-              Rejoindre l'aventure
+              Créer un compte
             </Link>
           </div>
         </div>

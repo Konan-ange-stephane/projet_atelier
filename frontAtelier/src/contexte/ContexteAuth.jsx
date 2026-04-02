@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
-import { authService } from '../services/serviceAuth';
+import { authService, extractErrorMessage } from '../services/serviceAuth';
+import { USER_KEY } from '../config';
 
 export const AuthContext = createContext(null);
 
@@ -9,11 +10,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    setLoading(false);
+    let cancelled = false;
+
+    const init = async () => {
+      const token = authService.getToken();
+      if (!token) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+      try {
+        const me = await authService.fetchCurrentUser();
+        if (!cancelled) setUser(me);
+      } catch {
+        authService.clearLocalSession();
+        if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = async (credentials) => {
@@ -22,9 +41,9 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       return { success: true, data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Erreur de connexion' 
+      return {
+        success: false,
+        error: extractErrorMessage(error),
       };
     }
   };
@@ -34,21 +53,21 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.register(userData);
       return { success: true, data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || "Erreur d'inscription" 
+      return {
+        success: false,
+        error: extractErrorMessage(error),
       };
     }
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('smarttrip_user', JSON.stringify(updatedUser));
+    localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
   };
 
   const value = {

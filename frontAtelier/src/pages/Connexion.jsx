@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getPostLoginPath } from '../utils/postLoginRedirect';
 import BarreNav from '../components/BarreNav';
 import PiedPage from '../components/PiedPage';
 
@@ -26,13 +27,7 @@ const Connexion = () => {
 
     if (result.success) {
       const role = result.data?.user?.role;
-      const routes = {
-        CLIENT:    '/client/trajets',
-        COMPAGNIE: '/agent/trips',
-        AGENT:     '/agent/trips',
-        ADMIN:     '/admin/statistics',
-      };
-      navigate(routes[role] || '/');
+      navigate(getPostLoginPath(role));
     } else {
       setErreur(result.error);
     }
@@ -172,36 +167,19 @@ const Connexion = () => {
                   <div className="flex-1 h-px bg-gray-200"></div>
                 </div>
 
-                {/* Liens vers inscription selon le profil */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-3">
                   <Link
                     to="/inscription"
-                    className="py-2.5 px-2 rounded-xl border-2 border-bleu-secondaire/30 text-bleu-nuit text-xs font-semibold text-center hover:bg-bleu-secondaire/5 transition flex items-center justify-center gap-1"
+                    className="block w-full py-3 rounded-xl border-2 border-bleu-secondaire/30 text-bleu-nuit text-sm font-semibold text-center hover:bg-bleu-secondaire/5 transition"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                      <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-                    </svg>
-                    Voyageur
+                    Créer un compte voyageur
                   </Link>
-                  <Link
-                    to="/inscription?role=compagnie"
-                    className="py-2.5 px-2 rounded-xl border-2 border-cyan-accent/40 text-bleu-nuit text-xs font-semibold text-center hover:bg-cyan-accent/5 transition flex items-center justify-center gap-1"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                      <path fillRule="evenodd" d="M3 2.25a.75.75 0 0 0 0 1.5v16.5h-.75a.75.75 0 0 0 0 1.5H15v-18a.75.75 0 0 0 0-1.5H3ZM6.75 19.5v-2.25a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v2.25h1.5V6h-9v13.5h3Z" clipRule="evenodd" />
-                    </svg>
-                    Compagnie
-                  </Link>
-                  <Link
-                    to="/inscription?role=agent"
-                    className="py-2.5 px-2 rounded-xl border-2 border-emerald-300 text-emerald-700 text-xs font-semibold text-center hover:bg-emerald-50 transition flex items-center justify-center gap-1"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                      <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h.375a3 3 0 1 1 6 0h3a3 3 0 1 1 6 0h.375c1.035 0 1.875-.84 1.875-1.875v-3.75a3 3 0 0 0-3-3H13.5v4.5Z" />
-                      <path d="M8.25 19.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0ZM19.5 19.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" />
-                    </svg>
-                    Agent
-                  </Link>
+                  <p className="text-center text-xs text-gray-500">
+                    Agent ou partenaire ? Les comptes sont créés par l’administrateur.{' '}
+                    <Link to="/espace-agent" className="text-bleu-secondaire font-semibold hover:underline">
+                      En savoir plus
+                    </Link>
+                  </p>
                 </div>
 
               </form>
