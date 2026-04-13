@@ -1,146 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { trajetService } from '../../services/trajetService';
-import { reservationService } from '../../services/reservationService';
+import React, { useState } from 'react'; 
+import { useNavigate } from 'react-router-dom'; 
 import LayoutClient from '../../components/LayoutClient';
-import TrajetCard from '../../components/TrajetCard';
-import Chargeur from '../../components/Chargeur';
+import { Search, MapPin, Bus, Navigation } from 'lucide-react';
+import busImage from '../../assets/images/bus1.png';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [trajetsPopulaires, setTrajetsPopulaires] = useState([]);
-  const [prochainsVoyages, setProchainsVoyages] = useState([]);
-  const [statistiques, setStatistiques] = useState({
-    voyagesEffectues: 0,
-    reservationsActives: 0,
-    pointsFidelite: 0
-  });
-  const [chargement, setChargement] = useState(true);
 
-  useEffect(() => {
-    chargerDonnees();
-  }, []);
+  const [depart, setDepart] = useState('Abidjan (Gare Nord)');
+  const [destination, setDestination] = useState('Bouaké (Centre)');
 
-  const chargerDonnees = async () => {
-    try {
-      const trajets = await trajetService.getTrajets();
-      setTrajetsPopulaires(trajets.slice(0, 3));
-
-      const reservations = await reservationService.getMesReservations();
-      const prochains = reservations.filter(r => 
-        r.statut === 'Confirmée' && new Date(r.date) >= new Date()
-      );
-      setProchainsVoyages(prochains);
-
-      setStatistiques({
-        voyagesEffectues: reservations.filter(r => r.statut === 'Terminée').length,
-        reservationsActives: prochains.length,
-        pointsFidelite: reservations.filter(r => r.statut === 'Terminée').length * 50
-      });
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setChargement(false);
-    }
+  const handleSearch = () => {
+    console.log("Recherche lancée pour :", depart, "vers", destination);
+    
+    navigate(`/client/trajets?from=${depart}&to=${destination}`);
   };
-
-  const handleReserver = (trajetId) => {
-    navigate(`/client/trajet/${trajetId}`);
-  };
-
-  if (chargement) {
-    return <Chargeur fullScreen />;
-  }
 
   return (
-    <LayoutClient 
-      title="Tableau de bord" 
-      subtitle="Vue d'ensemble de vos voyages"
-    >
-      {/* Action rapide */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-[2rem] shadow-lg p-8 mb-8 text-white">
-        <h3 className="text-2xl font-black mb-2">Prêt pour votre prochain voyage ?</h3>
-        <p className="text-indigo-100 mb-6">Réservez votre trajet en quelques clics</p>
-        <button
-          onClick={() => navigate('/client/trajets')}
-          className="px-8 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 transition-all"
-        >
-          Réserver maintenant →
-        </button>
-      </div>
-
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-500 text-sm font-bold">Voyages effectués</p>
-              <p className="text-3xl font-black text-slate-900 mt-2">{statistiques.voyagesEffectues}</p>
+    <LayoutClient title="Accueil">
+      <div className="w-full space-y-8">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          <div className="lg:col-span-7 rounded-[2.5rem] overflow-hidden relative min-h-[380px] flex flex-col justify-between shadow-sm">
+            <img src={busImage} alt="Bus" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" />
+            <div className="relative z-10 p-8">
+              <span className="inline-block bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full"> ✨ Voyagez malin </span>
             </div>
-            <div className="text-4xl">✅</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-500 text-sm font-bold">Réservations actives</p>
-              <p className="text-3xl font-black text-indigo-600 mt-2">{statistiques.reservationsActives}</p>
+            <div className="relative z-10 p-8">
+              <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight drop-shadow-lg">Bonjour Julien !</h2>
+              <p className="text-white/70 font-bold mt-1 uppercase tracking-widest text-sm">Où allons-nous aujourd'hui ?</p>
             </div>
-            <div className="text-4xl">🎫</div>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-500 text-sm font-bold">Points fidélité</p>
-              <p className="text-3xl font-black text-green-600 mt-2">{statistiques.pointsFidelite}</p>
-            </div>
-            <div className="text-4xl">⭐</div>
-          </div>
-        </div>
-      </div>
+          {/* BLOC DROITE : Formulaire */}
+          <div className="lg:col-span-5 bg-white p-8 lg:p-10 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-blue-50 flex flex-col justify-center">
+            <div className="space-y-6">
+              <div className="text-center lg:text-left">
+                <h3 className="text-xl font-black text-slate-900">Votre itinéraire</h3>
+                <div className="h-1.5 w-10 bg-blue-600 rounded-full mt-2 mx-auto lg:mx-0" />
+              </div>
 
-      {/* Prochains voyages */}
-      {prochainsVoyages.length > 0 && (
-        <section className="mb-8">
-          <h3 className="text-xl font-black text-slate-900 mb-4">📅 Vos prochains voyages</h3>
-          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-            {prochainsVoyages.map((voyage) => (
-              <div key={voyage.id} className="p-6 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-bold text-slate-900">{voyage.trajet}</h4>
-                    <p className="text-slate-600 mt-1 text-sm">
-                      {voyage.date} à {voyage.heure} • Siège N°{voyage.siege}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Compagnie: {voyage.compagnie}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-black rounded-full uppercase tracking-wider">
-                      {voyage.statut}
-                    </span>
-                    <p className="text-xs text-slate-500 mt-2">Code: {voyage.codeReservation}</p>
+              <div className="space-y-4">
+                {/* Départ */}
+                <div className="group">
+                  <label className="block text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 ml-2">Point de départ</label>
+                  <div className="relative">
+                    <select 
+                      value={depart}
+                      onChange={(e) => setDepart(e.target.value)} // On met à jour quand on change
+                      className="w-full pl-6 pr-12 py-5 bg-slate-50 rounded-2xl font-bold text-slate-900 outline-none border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all appearance-none cursor-pointer"
+                    >
+                      <option>Abidjan (Gare Nord)</option>
+                      <option>Yamoussoukro</option>
+                    </select>
+                    <Navigation className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* Trajets populaires */}
-      <section>
-        <h3 className="text-xl font-black text-slate-900 mb-4">🔥 Trajets populaires</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trajetsPopulaires.map((trajet) => (
-            <TrajetCard key={trajet.id} trajet={trajet} onReserver={handleReserver} />
-          ))}
+                {/* Destination */}
+                <div className="group">
+                  <label className="block text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 ml-2">Destination</label>
+                  <div className="relative">
+                    <select 
+                      value={destination} 
+                      onChange={(e) => setDestination(e.target.value)} // On met à jour quand on change
+                      className="w-full pl-6 pr-12 py-5 bg-slate-50 rounded-2xl font-bold text-slate-900 outline-none border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all appearance-none cursor-pointer"
+                    >
+                      <option>Bouaké (Centre)</option>
+                      <option>San-Pédro</option>
+                    </select>
+                    <MapPin className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                  </div>
+                </div>
+
+                
+                <button 
+                  onClick={handleSearch} 
+                  className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm mt-6"
+                >
+                  <Search size={20} strokeWidth={3} />
+                  Rechercher un trajet
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+
+       
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex flex-col items-center text-center space-y-2">
+          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-2"> <Bus size={24} /> </div>
+          <h4 className="text-xl font-black text-slate-900">Bienvenue sur SmartTrip !</h4>
+          <p className="text-slate-400 font-medium max-w-md"> Réservez votre trajet en quelques clics et voyagez en toute sérénité. </p>
+        </div>
+
+      </div>
     </LayoutClient>
   );
 };

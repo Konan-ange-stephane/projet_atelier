@@ -1,93 +1,87 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// src/components/LayoutClient.jsx
+import React, { useContext } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import SidebarClient from './SidebarClient';
+import { AuthContext } from '../context/AuthContext';
 
-const HeaderClient = ({ title, subtitle }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications] = useState([
-    { id: 1, titre: 'Nouveau trajet disponible', message: 'Abidjan → Bouaké à 7000 FCFA', heure: 'Il y a 2h', lu: false },
-    { id: 2, titre: 'Rappel de voyage', message: 'Votre voyage vers Yamoussoukro est demain à 8h', heure: 'Il y a 5h', lu: false },
-    { id: 3, titre: 'Points fidélité', message: 'Vous avez gagné 50 points !', heure: 'Hier', lu: true },
-  ]);
+const LayoutClient = ({ children, title }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
 
-  const notificationsNonLues = notifications.filter(n => !n.lu).length;
+  const handleDeconnexion = (e) => {
+    e.preventDefault();
+    logout();
+    navigate('/', { replace: true });
+  };
+
+  const navItems = [
+    { name: 'Accueil',     path: '/client',                  icon: '🏠' },
+    { name: 'Trajets',     path: '/client/trajets',          icon: '📍' },
+    { name: 'Billets',     path: '/client/mes-reservations', icon: '🎫' },
+    { name: 'Profil',      path: '/client/profil',           icon: '👤' },
+    { name: 'Déconnexion', path: null, icon: '🚪', onClick: handleDeconnexion },
+  ];
 
   return (
-    <header className="mb-10 flex items-center justify-between">
-      <div>
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h2>
-        {subtitle && <p className="text-slate-500 font-medium mt-1">{subtitle}</p>}
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
+      <div className="hidden lg:block w-72 flex-shrink-0">
+        <SidebarClient />
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Bouton Notifications */}
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-all group"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 group-hover:text-indigo-600 transition-colors">
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-            </svg>
-            {notificationsNonLues > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
-                {notificationsNonLues}
-              </span>
-            )}
-          </button>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white p-4 md:p-6 lg:px-10 border-b border-gray-100 flex justify-between items-center sticky top-0 z-40">
+          <h1 className="text-lg md:text-xl font-black text-slate-900">{title || "SmartTrip"}</h1>
+          <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-xl shadow-sm">👤</div>
+        </header>
 
-          {/* Dropdown Notifications */}
-          {showNotifications && (
-            <>
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setShowNotifications(false)}
-              />
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden">
-                <div className="p-4 border-b border-slate-100">
-                  <h3 className="font-black text-slate-900">Notifications</h3>
-                  <p className="text-xs text-slate-500 mt-1">{notificationsNonLues} non lue(s)</p>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((notif) => (
-                    <div 
-                      key={notif.id} 
-                      className={`p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors ${!notif.lu ? 'bg-indigo-50' : ''}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${!notif.lu ? 'bg-indigo-600' : 'bg-slate-300'}`}></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-slate-900">{notif.titre}</p>
-                          <p className="text-xs text-slate-600 mt-1">{notif.message}</p>
-                          <p className="text-[10px] text-slate-400 mt-2">{notif.heure}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 text-center border-t border-slate-100">
-                  <button className="text-xs font-bold text-indigo-600 hover:text-indigo-700">
-                    Tout marquer comme lu
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <main className="p-4 md:p-6 lg:p-10 pb-28 lg:pb-10">
+          {children}
+        </main>
 
-        {/* Bouton Paramètres */}
-        <Link
-          to="/client/profil"
-          className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-all group"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 group-hover:text-indigo-600 transition-colors">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </Link>
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center z-50 h-20 px-4 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]">
+          {navItems.map((item) => {
+            const isActive = item.path && location.pathname === item.path;
+
+            if (item.onClick) {
+              return (
+                <button
+                  key="deconnexion"
+                  onClick={item.onClick}
+                  className="flex flex-col items-center justify-center w-full h-full relative group"
+                >
+                  <span className="text-2xl opacity-40 group-active:scale-90 transition-transform">
+                    {item.icon}
+                  </span>
+                  <span className="text-[10px] font-black mt-1 text-gray-400">
+                    {item.name}
+                  </span>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="flex flex-col items-center justify-center w-full h-full relative"
+              >
+                <span className={`text-2xl transition-all duration-300 ${isActive ? 'scale-125 -translate-y-1' : 'opacity-40 grayscale'}`}>
+                  {item.icon}
+                </span>
+                {isActive && (
+                  <span className="absolute bottom-3 w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                )}
+                <span className={`text-[10px] font-black mt-1 ${isActive ? 'text-blue-600' : 'text-gray-400 opacity-0'}`}>
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
-    </header>
+    </div>
   );
 };
 
-export default HeaderClient;
+export default LayoutClient;

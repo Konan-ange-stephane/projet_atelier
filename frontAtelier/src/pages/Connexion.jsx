@@ -29,7 +29,7 @@ const Connexion = () => {
       const role = result.data?.user?.role;
       navigate(getPostLoginPath(role));
     } else {
-      setErreur(result.error);
+      setErreur(result.error || 'Email ou mot de passe incorrect.');
     }
   };
 
@@ -40,8 +40,6 @@ const Connexion = () => {
       <section className="py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-md mx-auto">
-
-            {/* Titre */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-bleu-secondaire to-cyan-accent rounded-2xl flex items-center justify-center shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-8 h-8">
@@ -56,10 +54,7 @@ const Connexion = () => {
               </p>
             </div>
 
-            {/* Card formulaire */}
             <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100">
-
-              {/* Erreur */}
               {erreur && (
                 <div className="mb-5 bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
                   <span>⚠️</span>
@@ -68,8 +63,6 @@ const Connexion = () => {
               )}
 
               <form onSubmit={gererConnexion} className="space-y-5">
-
-                {/* Email */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                     Email <span className="text-red-500">*</span>
@@ -92,7 +85,6 @@ const Connexion = () => {
                   </div>
                 </div>
 
-                {/* Mot de passe */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-sm font-semibold text-gray-700">
@@ -139,7 +131,6 @@ const Connexion = () => {
                   </div>
                 </div>
 
-                {/* Bouton connexion */}
                 <button
                   type="submit"
                   disabled={chargement}
@@ -160,11 +151,10 @@ const Connexion = () => {
                   )}
                 </button>
 
-                {/* Séparateur */}
                 <div className="flex items-center gap-3 py-1">
-                  <div className="flex-1 h-px bg-gray-200"></div>
+                  <div className="flex-1 h-px bg-gray-200" />
                   <span className="text-xs text-gray-400 font-medium">OU</span>
-                  <div className="flex-1 h-px bg-gray-200"></div>
+                  <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
                 <div className="space-y-3">
@@ -181,10 +171,8 @@ const Connexion = () => {
                     </Link>
                   </p>
                 </div>
-
               </form>
             </div>
-
           </div>
         </div>
       </section>

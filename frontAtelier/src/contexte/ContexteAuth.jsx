@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx
+// src/contexte/ContexteAuth.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import { authService, extractErrorMessage } from '../services/serviceAuth';
 import { USER_KEY } from '../config';
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     isAuthenticated: !!user,
-    loading
+    loading,
   };
 
   return (

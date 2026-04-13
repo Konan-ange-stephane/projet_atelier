@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '../config';
 
-// Service d'authentification
+// --- SERVICE AUTHENTIFICATION ---
 export const authService = {
   register: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -28,7 +28,7 @@ export const authService = {
   },
 };
 
-// Service des trajets
+// --- SERVICE DES TRAJETS (TRIPS) ---
 export const tripService = {
   getAllTrips: async () => {
     const response = await fetch(`${API_BASE_URL}/trips`);
@@ -53,7 +53,7 @@ export const tripService = {
       headers: {
         'Content-Type': 'application/json',
         'X-User-Id': agentId,
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(tripData),
     });
@@ -65,7 +65,7 @@ export const tripService = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(tripData),
     });
@@ -79,69 +79,9 @@ export const tripService = {
     });
     return response.json();
   },
-
-  getAgentTrips: async (agentId, token) => {
-    const response = await fetch(`${API_BASE_URL}/trips/agent/${agentId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.json();
-  },
 };
 
-// Service des véhicules
-export const vehicleService = {
-  getAllVehicles: async () => {
-    const response = await fetch(`${API_BASE_URL}/vehicles`);
-    return response.json();
-  },
-
-  getVehicleById: async (vehicleId) => {
-    const response = await fetch(`${API_BASE_URL}/vehicles/${vehicleId}`);
-    return response.json();
-  },
-
-  createVehicle: async (vehicleData, agentId, token) => {
-    const response = await fetch(`${API_BASE_URL}/vehicles`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-User-Id': agentId,
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(vehicleData),
-    });
-    return response.json();
-  },
-
-  updateVehicle: async (vehicleId, vehicleData, token) => {
-    const response = await fetch(`${API_BASE_URL}/vehicles/${vehicleId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(vehicleData),
-    });
-    return response.json();
-  },
-
-  deleteVehicle: async (vehicleId, token) => {
-    const response = await fetch(`${API_BASE_URL}/vehicles/${vehicleId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.json();
-  },
-
-  getAgentVehicles: async (agentId, token) => {
-    const response = await fetch(`${API_BASE_URL}/vehicles/agent/${agentId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.json();
-  },
-};
-
-// Service des réservations
+// --- SERVICE DES RÉSERVATIONS ---
 export const reservationService = {
   createReservation: async (reservationData, clientId, token) => {
     const response = await fetch(`${API_BASE_URL}/reservations`, {
@@ -149,29 +89,15 @@ export const reservationService = {
       headers: {
         'Content-Type': 'application/json',
         'X-User-Id': clientId,
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(reservationData),
     });
     return response.json();
   },
 
-  getReservationById: async (reservationId, token) => {
-    const response = await fetch(`${API_BASE_URL}/reservations/${reservationId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.json();
-  },
-
   getClientReservations: async (clientId, token) => {
     const response = await fetch(`${API_BASE_URL}/reservations/client/${clientId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.json();
-  },
-
-  getTripReservations: async (tripId, token) => {
-    const response = await fetch(`${API_BASE_URL}/reservations/trip/${tripId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.json();
@@ -186,7 +112,7 @@ export const reservationService = {
   },
 };
 
-// Service des statistiques
+// --- SERVICE DES STATISTIQUES ---
 export const statisticsService = {
   getStatistics: async (token) => {
     const response = await fetch(`${API_BASE_URL}/admin/statistics`, {
