@@ -1,10 +1,11 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { authService } from '../services/serviceAuth';
 
+// 1. Création du contexte
 export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+// 2. Définition du Provider
+export const AuthProvider = ({ children }) => { // Utilisation de "children" (standard React)
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,4 +67,13 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// 3. AJOUT IMPORTANT : Le hook useAuth pour que LayoutClient.jsx fonctionne
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth doit être utilisé à l'intérieur d'un AuthProvider");
+  }
+  return context;
 };

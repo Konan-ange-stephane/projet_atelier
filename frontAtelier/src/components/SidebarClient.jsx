@@ -1,124 +1,179 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+// src/pages/client/Dashboard.jsx
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LayoutClient from '../../components/LayoutClient';
 
-const SidebarClient = ({ user, logout }) => {
-  const location = useLocation();
-  const activePath = location.pathname;
+const VILLES = [
+  'Abidjan (Gare Nord)',
+  'Bouaké (Centre)',
+  'Yamoussoukro',
+  'San-Pédro',
+  'Korhogo',
+  'Daloa',
+  'Man',
+];
 
-  const menuItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Tableau de bord', 
-      path: '/client', 
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="7" height="9" x="3" y="3" rx="1"/>
-          <rect width="7" height="5" x="14" y="3" rx="1"/>
-          <rect width="7" height="9" x="14" y="12" rx="1"/>
-          <rect width="7" height="5" x="3" y="16" rx="1"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'trajets', 
-      label: 'Trajets disponibles', 
-      path: '/client/trajets', 
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'reservations', 
-      label: 'Mes réservations', 
-      path: '/client/mes-reservations', 
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 9V5.25A2.25 2.25 0 0 1 4.25 3h15.5A2.25 2.25 0 0 1 22 5.25V9"/>
-          <path d="M2 15v3.75A2.25 2.25 0 0 0 4.25 21h15.5A2.25 2.25 0 0 0 22 18.75V15"/>
-          <rect width="20" height="6" x="2" y="9" rx="2"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'profil', 
-      label: 'Mon profil', 
-      path: '/client/profil', 
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-      )
-    },
-  ];
+const TRAJETS_POPULAIRES = [
+  { id: 1, depart: 'Abidjan', arrivee: 'Bouaké',       heure: '08:30', places: 45, prix: 5000 },
+  { id: 2, depart: 'Abidjan', arrivee: 'Yamoussoukro', heure: '14:00', places: 38, prix: 4000 },
+  { id: 3, depart: 'Bouaké',  arrivee: 'San-Pédro',    heure: '07:00', places: 50, prix: 7500 },
+];
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [villeDepart,  setVilleDepart]  = useState(VILLES[0]);
+  const [villeArrivee, setVilleArrivee] = useState(VILLES[1]);
+
+  const handleRechercher = () => {
+    navigate('/client/trajets', { state: { depart: villeDepart, arrivee: villeArrivee } });
+  };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-100 flex flex-col shadow-sm z-50">
-      {/* Logo */}
-      <div className="p-8 mb-6 flex items-center gap-4">
-        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 9V5.25A2.25 2.25 0 0 1 4.25 3h15.5A2.25 2.25 0 0 1 22 5.25V9"/>
-            <path d="M2 15v3.75A2.25 2.25 0 0 0 4.25 21h15.5A2.25 2.25 0 0 0 22 18.75V15"/>
-            <rect width="20" height="6" x="2" y="9" rx="2"/>
-          </svg>
-        </div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tighter">SmartTrip</h1>
-      </div>
+    <LayoutClient title="Accueil">
+      <div className="max-w-6xl mx-auto space-y-10">
 
-      {/* Menu Navigation */}
-      <nav className="flex-1 px-4 space-y-2">
-        {menuItems.map((item) => (
-          <Link
-            key={item.id}
-            to={item.path}
-            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all duration-200 group ${
-              activePath === item.path
-                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100'
-                : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'
-            }`}
-          >
-            <div className={`${activePath === item.path ? 'text-white' : 'group-hover:text-indigo-600'} transition-colors`}>
-              {item.icon}
+        {/* ── HERO ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Illustration bus */}
+          <div className="relative aspect-[16/10] lg:aspect-auto min-h-[220px] bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden shadow-2xl shadow-blue-200">
+            {/* Cercles décoratifs */}
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full" />
+            <div className="absolute -bottom-8 -left-8  w-36 h-36 bg-white/10 rounded-full" />
+
+            {/* Icône bus stylisée */}
+            <div className="relative z-10 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]">
+                <rect x="1" y="3" width="15" height="13" rx="2"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
             </div>
-            <span className="text-sm">{item.label}</span>
-          </Link>
-        ))}
-      </nav>
 
-      {/* Section utilisateur */}
-      <div className="p-4 border-t border-slate-50">
-        <div className="mb-4 p-4 bg-slate-50 rounded-3xl border border-slate-100 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-indigo-600 font-black border border-slate-100">
-            {user?.nom ? user.nom[0].toUpperCase() : 'C'}
+            <div className="relative z-10 text-center px-6">
+              <p className="text-white font-black text-2xl md:text-3xl leading-tight drop-shadow">
+                Voyagez malin<br/>avec SmartTrip
+              </p>
+              <p className="text-white/70 text-sm font-bold mt-2">Réservez votre siège en quelques clics</p>
+            </div>
+
+            <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/30 text-white font-black text-[10px] uppercase tracking-widest">
+              ✨ Rapide & Sécurisé
+            </div>
           </div>
-          <div className="overflow-hidden flex-1">
-            <p className="text-xs font-black text-slate-900 truncate leading-none mb-1">
-              {user?.nom || 'Client'}
+
+          {/* Formulaire de recherche — EXACTEMENT comme la maquette */}
+          <div className="bg-white p-7 md:p-10 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-center">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-1 leading-tight">
+              Bonjour Julien ! 👋
+            </h2>
+            <p className="text-slate-400 font-bold text-xs mb-8 uppercase tracking-widest">
+              Où souhaitez-vous aller ?
             </p>
-            <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">
-              Passager
+
+            <div className="space-y-4">
+              {/* De */}
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-blue-600 font-black text-[10px] uppercase tracking-wider z-10">De</span>
+                <select
+                  value={villeDepart}
+                  onChange={(e) => setVilleDepart(e.target.value)}
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 rounded-2xl font-black text-slate-900 outline-none border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all appearance-none cursor-pointer text-sm"
+                >
+                  {VILLES.map(v => <option key={v}>{v}</option>)}
+                </select>
+                <svg className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+
+              {/* À */}
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-blue-600 font-black text-[10px] uppercase tracking-wider z-10">À</span>
+                <select
+                  value={villeArrivee}
+                  onChange={(e) => setVilleArrivee(e.target.value)}
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 rounded-2xl font-black text-slate-900 outline-none border-2 border-transparent focus:border-blue-600 focus:bg-white transition-all appearance-none cursor-pointer text-sm"
+                >
+                  {VILLES.map(v => <option key={v}>{v}</option>)}
+                </select>
+                <svg className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+
+              <button
+                onClick={handleRechercher}
+                className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs mt-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Rechercher
+              </button>
+            </div>
+
+            <p className="text-center text-xs text-slate-400 font-bold mt-6">
+              🎫 Réservez votre trajet et achetez en ligne
             </p>
           </div>
         </div>
-        
-        <button
-          onClick={logout}
-          className="flex items-center gap-4 w-full px-4 py-3.5 text-rose-500 font-bold hover:bg-rose-50 rounded-2xl transition-all group"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" x2="9" y1="12" y2="12"/>
-          </svg>
-          <span className="text-sm">Déconnexion</span>
-        </button>
+
+        {/* ── DESTINATIONS PHARES ── */}
+        <section>
+          <div className="flex justify-between items-end mb-6 px-1">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Destinations phares</h3>
+              <div className="h-1 w-10 bg-blue-600 rounded-full mt-1" />
+            </div>
+            <button
+              onClick={() => navigate('/client/trajets')}
+              className="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline"
+            >
+              Voir tout →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {TRAJETS_POPULAIRES.map((t) => (
+              <div
+                key={t.id}
+                onClick={() => navigate(`/client/trajet/${t.id}`)}
+                className="bg-white p-7 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer group"
+              >
+                <div className="flex justify-between items-start mb-7">
+                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-all duration-300 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-white transition-colors">
+                      <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Ticket dès</p>
+                    <span className="font-black text-blue-600 text-xl tracking-tighter">
+                      {t.prix.toLocaleString()} F
+                    </span>
+                  </div>
+                </div>
+
+                <h4 className="font-black text-slate-900 text-lg mb-3">
+                  {t.depart} <span className="text-blue-500">→</span> {t.arrivee}
+                </h4>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                    🕐 {t.heure}
+                  </span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                    💺 {t.places} places
+                  </span>
+                </div>
+
+                <button className="mt-5 w-full py-3 bg-blue-50 text-blue-600 font-black text-xs uppercase tracking-widest rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                  Réserver →
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
       </div>
-    </aside>
+    </LayoutClient>
   );
 };
 
-export default SidebarClient;
+export default Dashboard;
