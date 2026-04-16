@@ -8,6 +8,7 @@ import Trajets from '../pages/clients/Trajets';
 import TrajetDetails from '../pages/clients/TrajetDetails';
 import Reservation from '../pages/clients/Reservation';        
 import MesReservations from '../pages/clients/MesReservations';
+import ReservationDetail from '../pages/clients/ReservationDetail';
 import ProfilClient from '../pages/clients/ProfilClient';
 import Paiement from '../pages/clients/Paiement';
 
@@ -23,7 +24,8 @@ const ClientRoutes = () => {
       
       {/* Réservation */}
       <Route path="reservation" element={<Reservation />} /> 
-      <Route path="mes-reservations" element={<MesReservations />} /> 
+      <Route path="mes-reservations/:id" element={<ReservationDetail />} />
+      <Route path="mes-reservations" element={<MesReservations />} />
       
       {/* Profil et paiement */}
       <Route path="profil" element={<ProfilClient />} /> 

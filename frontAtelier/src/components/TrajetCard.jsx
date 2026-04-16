@@ -47,6 +47,9 @@ const Button = ({
 
 const TrajetCard = ({ trajet, onReserver }) => (
   <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all group font-sans">
+    {trajet.compagnie && trajet.compagnie !== '—' ? (
+      <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">{trajet.compagnie}</p>
+    ) : null}
     <div className="flex justify-between items-start mb-6">
       <div className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
         Places disponibles

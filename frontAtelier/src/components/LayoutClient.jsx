@@ -119,7 +119,7 @@ const SidebarClient = ({ collapsed, setCollapsed, user, logout }) => {
   );
 };
 
-const LayoutClient = ({ children, title }) => {
+const LayoutClient = ({ children, title, subtitle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -151,9 +151,14 @@ const LayoutClient = ({ children, title }) => {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        <header className="bg-white px-5 md:px-8 h-16 border-b border-gray-100 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-          <div className="flex items-center gap-3">
-             <h1 className="text-base md:text-lg font-black text-slate-900">{title || 'SmartTrip'}</h1>
+        <header className="bg-white px-5 md:px-8 min-h-16 py-3 border-b border-slate-100/80 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+          <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+            <h1 className="text-base md:text-lg font-semibold tracking-tight text-slate-900 truncate">
+              {title || 'SmartTrip'}
+            </h1>
+            {subtitle ? (
+              <p className="text-xs md:text-sm text-slate-500 font-medium truncate">{subtitle}</p>
+            ) : null}
           </div>
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md">
             {user?.nom ? user.nom[0].toUpperCase() : 'U'}

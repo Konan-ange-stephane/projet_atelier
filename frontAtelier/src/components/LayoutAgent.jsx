@@ -1,0 +1,57 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+const navItems = [
+  { to: '/agent/reservations', label: 'Réservations' },
+  { to: '/agent/trajets', label: 'Trajets' },
+  { to: '/agent/passagers', label: 'Passagers' },
+  { to: '/agent/vehicules', label: 'Véhicules' },
+];
+
+const LayoutAgent = ({ title, children }) => {
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Espace agent</p>
+            <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+          </div>
+          <Link
+            to="/"
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Retour site
+          </Link>
+        </div>
+      </header>
+
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:px-6">
+        <aside className="h-fit rounded-xl border border-slate-200 bg-white p-2">
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const active = location.pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`block rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <main>{children}</main>
+      </div>
+    </div>
+  );
+};
+
+export default LayoutAgent;

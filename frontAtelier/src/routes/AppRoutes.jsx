@@ -12,6 +12,8 @@ import EspaceAgent from '../pages/EspaceAgent';
 
 // Pages client
 import ClientRoutes from "./ClientRoutes";
+import AgentRoutes from './AgentRoutes';
+import AdminRoutes from './AdminRoutes';
 
 // Route protégée
 const ProtectedRoute = ({ children, roles = [] }) => {
@@ -39,6 +41,26 @@ const AppRoutes = () => (
       element={
         <ProtectedRoute roles={['CLIENT', 'ADMIN']}>
           <ClientRoutes />
+        </ProtectedRoute>
+      }
+    />
+
+    {/* Routes agent sous /agent/* */}
+    <Route
+      path="/agent/*"
+      element={
+        <ProtectedRoute roles={['AGENT', 'ADMIN']}>
+          <AgentRoutes />
+        </ProtectedRoute>
+      }
+    />
+
+    {/* Routes admin sous /admin/* */}
+    <Route
+      path="/admin/*"
+      element={
+        <ProtectedRoute roles={['ADMIN']}>
+          <AdminRoutes />
         </ProtectedRoute>
       }
     />

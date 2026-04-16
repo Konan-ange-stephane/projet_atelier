@@ -1,13 +1,52 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Smartphone,
+  CreditCard,
+  Banknote,
+  Loader2,
+  Shield,
+  Bus,
+  AlertCircle,
+} from 'lucide-react';
 import LayoutClient from '../../components/LayoutClient';
 import ReservationSummary from '../../components/ReservationSummary';
+import { reservationService, mapUiModeToApi, normalizeTripForUi } from '../../services/api';
+
+const modes = [
+  {
+    id: 'mobile',
+    title: 'Mobile money',
+    description: 'Orange Money, MTN MoMo, Wave, etc.',
+    icon: Smartphone,
+    accent: 'from-amber-500 to-orange-600',
+  },
+  {
+    id: 'carte',
+    title: 'Carte bancaire',
+    description: 'Visa, Mastercard — saisie sécurisée',
+    icon: CreditCard,
+    accent: 'from-indigo-500 to-violet-600',
+  },
+  {
+    id: 'especes',
+    title: 'Espèces au guichet',
+    description: 'Règlement sur place avant le départ',
+    icon: Banknote,
+    accent: 'from-emerald-500 to-teal-600',
+  },
+];
 
 const Paiement = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { trajet, siege } = location.state || {};
+  const { reservation: resState, trajet: trajetState, placeId } = location.state || {};
+  const trajet =
+    trajetState ||
+    (resState?.trip ? normalizeTripForUi(resState.trip) : null) ||
+    (resState?.trajet ? normalizeTripForUi(resState.trajet) : null);
+  const reservationId = resState?.id ?? resState?.reservationId;
   
   const [methodePaiement, setMethodePaiement] = useState('');
   const [numeroTelephone, setNumeroTelephone] = useState('');
@@ -16,265 +55,288 @@ const Paiement = () => {
   const [dateExpiration, setDateExpiration] = useState('');
   const [cvv, setCvv] = useState('');
   const [traitement, setTraitement] = useState(false);
+  const [erreurPaiement, setErreurPaiement] = useState('');
 
-  if (!trajet) {
+  if (!trajet || !reservationId) {
     return (
-      <LayoutClient title="Paiement" subtitle="Finaliser votre réservation">
-        <div className="bg-white p-12 rounded-[2rem] shadow-sm border border-slate-100 text-center">
-          <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-black text-slate-800 mb-4">Aucune réservation en cours</h2>
+      <LayoutClient
+        title="Paiement"
+        subtitle="Finalisation de la réservation"
+      >
+        <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white px-8 py-14 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+            <Bus className="h-7 w-7" strokeWidth={1.5} />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900">Aucune réservation à régler</h2>
+          <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+            Choisissez un trajet et une place, puis validez la réservation pour accéder à cette étape.
+          </p>
           <button
+            type="button"
             onClick={() => navigate('/client/trajets')}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all"
+            className="mt-8 inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
           >
-            Retour aux trajets
+            Voir les trajets
           </button>
         </div>
       </LayoutClient>
     );
   }
 
+  const numeroSiege =
+    resState?.place?.numero ??
+    resState?.place?.numeroPlace ??
+    placeId ??
+    '—';
+
   const detailsReservation = {
     depart: trajet.depart,
     arrivee: trajet.arrivee,
-    siege: siege,
-    prix: trajet.prix
+    siege: numeroSiege,
+    prix: trajet.prix,
   };
 
   const handlePaiement = async (e) => {
     e.preventDefault();
+    setErreurPaiement('');
     
     if (!methodePaiement) {
-      alert('Veuillez choisir une méthode de paiement');
+      setErreurPaiement('Veuillez sélectionner un mode de paiement.');
       return;
     }
 
     setTraitement(true);
-
-    setTimeout(() => {
-      setTraitement(false);
-      alert('Paiement réussi ! Votre réservation est confirmée.');
+    try {
+      await reservationService.effectuerPaiement(reservationId, {
+        modePaiement: mapUiModeToApi(methodePaiement),
+      });
+      // Évite navigate(replace) + setState sur la page cible (race React 19 / removeChild)
+      try {
+        sessionStorage.setItem('smarttrip_paiement_ok', '1');
+      } catch {
+        /* quota / navigation privée */
+      }
       navigate('/client/mes-reservations');
-    }, 2000);
+    } catch (err) {
+      setErreurPaiement(
+        err?.response?.data?.message ||
+          err?.message ||
+          'Le paiement n’a pas pu être enregistré. Vérifiez vos informations ou réessayez plus tard.'
+      );
+    } finally {
+      setTraitement(false);
+    }
   };
 
   return (
     <LayoutClient 
-      title="Paiement" 
-      subtitle="Finalisez votre réservation en toute sécurité"
+      title="Paiement sécurisé"
+      subtitle="Choisissez un mode de règlement pour confirmer votre réservation."
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulaire de paiement */}
-        <div className="lg:col-span-2">
-          <form onSubmit={handlePaiement}>
-            {/* Choix de la méthode de paiement */}
-            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 mb-6">
-              <h3 className="text-xl font-black text-slate-900 mb-4">Méthode de paiement</h3>
-              
-              <div className="space-y-3">
-                <label className="flex items-center p-4 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-indigo-500 transition-all group">
-                  <input
-                    type="radio"
-                    name="methodePaiement"
-                    value="mobile"
-                    checked={methodePaiement === 'mobile'}
-                    onChange={(e) => setMethodePaiement(e.target.value)}
-                    className="mr-3 w-5 h-5 text-indigo-600"
-                  />
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-100">
-                      📱
+      <div className="mx-auto mb-8 flex max-w-3xl items-center gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800">
+          1
+        </div>
+        <div className="h-px flex-1 bg-slate-200" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
+          2
                     </div>
-                    <div>
-                      <p className="font-black text-slate-900">Mobile Money</p>
-                      <p className="text-sm text-slate-600">Orange Money, MTN Money, Moov Money</p>
+        <div className="min-w-0 flex-1 pl-2 text-xs text-slate-600 sm:text-sm">
+          <span className="font-medium text-slate-400">Étape 1 · Réservation</span>
+          <span className="mx-2 text-slate-300 hidden sm:inline">|</span>
+          <span className="font-semibold text-slate-900">Étape 2 · Paiement</span>
                     </div>
                   </div>
-                </label>
 
-                <label className="flex items-center p-4 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-indigo-500 transition-all group">
-                  <input
-                    type="radio"
-                    name="methodePaiement"
-                    value="carte"
-                    checked={methodePaiement === 'carte'}
-                    onChange={(e) => setMethodePaiement(e.target.value)}
-                    className="mr-3 w-5 h-5 text-indigo-600"
-                  />
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-indigo-100">
-                      💳
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          {erreurPaiement && (
+            <div
+              className="flex gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              role="alert"
+            >
+              <AlertCircle className="h-5 w-5 shrink-0 text-red-600" strokeWidth={2} />
+              <p>{erreurPaiement}</p>
                     </div>
-                    <div>
-                      <p className="font-black text-slate-900">Carte bancaire</p>
-                      <p className="text-sm text-slate-600">Visa, Mastercard</p>
-                    </div>
-                  </div>
-                </label>
+          )}
 
-                <label className="flex items-center p-4 border-2 border-slate-200 rounded-2xl cursor-pointer hover:border-indigo-500 transition-all group">
+          <form onSubmit={handlePaiement} className="space-y-6">
+            <fieldset className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm md:p-8">
+              <legend className="sr-only">Mode de paiement</legend>
+              <h3 className="text-base font-semibold text-slate-900">Mode de règlement</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Le montant appliqué est celui du trajet, tel que défini par le transporteur.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                {modes.map(({ id, title, description, icon: IconComponent, accent }) => {
+                  const selected = methodePaiement === id;
+                  return (
+                    <label
+                      key={id}
+                      className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-4 transition ${
+                        selected
+                          ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                      }`}
+                    >
                   <input
                     type="radio"
                     name="methodePaiement"
-                    value="especes"
-                    checked={methodePaiement === 'especes'}
+                        value={id}
+                        checked={selected}
                     onChange={(e) => setMethodePaiement(e.target.value)}
-                    className="mr-3 w-5 h-5 text-indigo-600"
-                  />
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-green-100">
-                      💵
+                        className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <div
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br text-white shadow-md ${accent}`}
+                      >
+                        {React.createElement(IconComponent, {
+                          className: 'h-6 w-6',
+                          strokeWidth: 1.75,
+                        })}
                     </div>
-                    <div>
-                      <p className="font-black text-slate-900">Espèces</p>
-                      <p className="text-sm text-slate-600">Paiement au guichet</p>
-                    </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-slate-900">{title}</p>
+                        <p className="text-sm text-slate-500">{description}</p>
                   </div>
                 </label>
+                  );
+                })}
               </div>
-            </div>
+            </fieldset>
 
-            {/* Formulaire Mobile Money */}
             {methodePaiement === 'mobile' && (
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 mb-6">
-                <h3 className="text-xl font-black text-slate-900 mb-4">Informations Mobile Money</h3>
-                <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm md:p-8">
+                <h3 className="text-base font-semibold text-slate-900">Coordonnées Mobile Money</h3>
+                <div className="mt-5 space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Numéro de téléphone
-                    </label>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Numéro de téléphone</label>
                     <input
                       type="tel"
                       value={numeroTelephone}
                       onChange={(e) => setNumeroTelephone(e.target.value)}
-                      placeholder="+225 XX XX XX XX XX"
+                      placeholder="+225 …"
                       required
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     />
                   </div>
-                  <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                    <p className="text-sm text-indigo-800 font-medium">
-                      📲 Vous recevrez un message sur votre téléphone pour confirmer le paiement.
+                  <div className="flex gap-3 rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-3 text-sm text-indigo-900">
+                    <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600" />
+                    <p>
+                      Une demande de confirmation peut vous être envoyée sur ce numéro selon l’opérateur et la
+                      configuration du transporteur.
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Formulaire Carte bancaire */}
             {methodePaiement === 'carte' && (
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 mb-6">
-                <h3 className="text-xl font-black text-slate-900 mb-4">Informations de carte</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Numéro de carte
-                    </label>
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm md:p-8">
+                <h3 className="text-base font-semibold text-slate-900">Carte bancaire</h3>
+                <p className="mt-1 text-sm text-slate-500">Les champs ci-dessous sont indicatifs pour votre maquette.</p>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Numéro de carte</label>
                     <input
                       type="text"
                       value={numeroCarte}
                       onChange={(e) => setNumeroCarte(e.target.value)}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength="19"
+                      placeholder="0000 0000 0000 0000"
+                      maxLength={19}
                       required
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm tracking-wide focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Nom sur la carte
-                    </label>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Nom figurant sur la carte</label>
                     <input
                       type="text"
                       value={nomCarte}
                       onChange={(e) => setNomCarte(e.target.value)}
-                      placeholder="NOM PRENOM"
+                      placeholder="NOM PRÉNOM"
                       required
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm uppercase focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">
-                        Date d'expiration
-                      </label>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Expiration</label>
                       <input
                         type="text"
                         value={dateExpiration}
                         onChange={(e) => setDateExpiration(e.target.value)}
                         placeholder="MM/AA"
-                        maxLength="5"
+                      maxLength={5}
                         required
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">
-                        CVV
-                      </label>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">CVV</label>
                       <input
-                        type="text"
+                      type="password"
                         value={cvv}
                         onChange={(e) => setCvv(e.target.value)}
-                        placeholder="123"
-                        maxLength="3"
+                      placeholder="•••"
+                      maxLength={4}
                         required
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       />
-                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Message pour paiement en espèces */}
             {methodePaiement === 'especes' && (
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 mb-6">
-                <h3 className="text-xl font-black text-slate-900 mb-4">Paiement en espèces</h3>
-                <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
-                  <p className="text-orange-800 mb-3 font-bold">
-                    💵 Votre réservation sera confirmée. Vous devrez payer au guichet avant le départ.
-                  </p>
-                  <p className="text-sm text-orange-700">
-                    Présentez-vous au moins 30 minutes avant l'heure de départ avec votre code de réservation.
-                  </p>
-                </div>
+              <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-6 md:p-8">
+                <h3 className="text-base font-semibold text-amber-950">Paiement en agence</h3>
+                <p className="mt-2 text-sm leading-relaxed text-amber-900/90">
+                  Votre place reste réservée en attente de paiement. Munissez-vous de la référence de réservation et
+                  présentez-vous au guichet ou au point de vente indiqué par la compagnie, dans les délais communiqués
+                  sur votre billet.
+                </p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={traitement || !methodePaiement}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-black text-sm uppercase tracking-wider rounded-xl transition-all disabled:bg-slate-400 disabled:cursor-not-allowed shadow-lg shadow-green-100"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {traitement ? 'Traitement en cours...' : 'Confirmer le paiement'}
+              {traitement ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Traitement…
+                </>
+              ) : (
+                <>
+                  <Shield className="h-4 w-4" strokeWidth={2} />
+                  Valider le paiement
+                </>
+              )}
             </button>
           </form>
         </div>
 
-        {/* Résumé de la réservation */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4">
-            <ReservationSummary details={detailsReservation} />
-            
-            <div className="mt-4 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6">
-              <h4 className="font-black text-slate-900 mb-3">Informations importantes</h4>
-              <ul className="text-sm text-slate-600 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">✓</span>
-                  <span>Arrivez 30 min avant le départ</span>
+          <div className="sticky top-24 space-y-6">
+            <ReservationSummary details={detailsReservation} reference={reservationId} />
+
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <h4 className="text-sm font-semibold text-slate-900">Bon à savoir</h4>
+              <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                <li className="flex gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  Présentez-vous au moins 30 minutes avant l’heure affichée.
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">✓</span>
-                  <span>Présentez une pièce d'identité</span>
+                <li className="flex gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  Une pièce d’identité peut être demandée à l’embarquement.
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">✓</span>
-                  <span>Annulation gratuite 24h avant</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">✓</span>
-                  <span>Modification possible jusqu'à 12h avant</span>
+                <li className="flex gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  Les conditions d’annulation et de modification dépendent du transporteur.
                 </li>
               </ul>
             </div>
