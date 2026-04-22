@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import LayoutAgent from '../../components/LayoutAgent';
 import { agentService, companyService } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const EMPTY_FORM = {
   compagnieId: '',
@@ -50,11 +51,16 @@ function vehicleCompagnieLabel(v, companies) {
 }
 
 const VehiculesAgent = () => {
+  const { user } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const getAgentCompanyId = () => {
+    return user?.compagnie?.id || user?.companyId || user?.compagnieId || (companies.length > 0 ? companies[0].id : null);
+  };
 
   const loadVehicles = async () => {
     try {
@@ -97,7 +103,8 @@ const VehiculesAgent = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    const compagnieId = Number(form.compagnieId);
+    const rawCid = form.compagnieId || getAgentCompanyId();
+    const compagnieId = Number(rawCid);
     const capacite = Number(form.capacite);
     const payload = {
       compagnieId,
@@ -106,7 +113,7 @@ const VehiculesAgent = () => {
       capacite,
     };
     if (!Number.isFinite(compagnieId) || compagnieId < 1) {
-      alert('Choisissez une compagnie.');
+      alert("Impossible de déterminer la compagnie de l'agent.");
       return;
     }
     if (!payload.matricule || !payload.marque || !Number.isFinite(capacite) || capacite < 1) {
@@ -163,21 +170,9 @@ const VehiculesAgent = () => {
     <LayoutAgent title="Véhicules">
       <section className="space-y-4">
         <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">CRUD véhicules</h2>
+          <h2 className="text-base font-semibold text-slate-900">GESTION DES VEHICULES</h2>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <select
-              value={form.compagnieId}
-              onChange={(e) => setForm((prev) => ({ ...prev, compagnieId: e.target.value }))}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="">— Compagnie —</option>
-              {companies.map((c) => (
-                <option key={c.id} value={String(c.id)}>
-                  {companyLabel(c)}
-                </option>
-              ))}
-            </select>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
             <input
               value={form.matricule}
               onChange={(e) => setForm((prev) => ({ ...prev, matricule: e.target.value }))}

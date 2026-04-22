@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import LayoutAdmin from '../../components/LayoutAdmin';
-import { adminService } from '../../services/api';
+import { adminService, companyService } from '../../services/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -13,6 +14,8 @@ const AdminUsers = () => {
     try {
       const data = await adminService.getUsers();
       setUsers(Array.isArray(data) ? data : []);
+      const comps = await companyService.getCompanies();
+      setCompanies(Array.isArray(comps) ? comps : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || 'Chargement impossible.');
       setUsers([]);
@@ -26,9 +29,24 @@ const AdminUsers = () => {
   }, []);
 
   const promote = async (userId) => {
-    if (!window.confirm('Promouvoir cet utilisateur au rôle agent ?')) return;
+    const compName = window.prompt(`Entrez le nom ou l'ID de la compagnie pour cet agent :\n(Disponibles : ${companies.map(c => c.nomCompagnie).join(', ')})`);
+    if (!compName) return;
+    
+    const company = companies.find(c => 
+      c.nomCompagnie.toLowerCase() === compName.toLowerCase().trim() || 
+      c.id.toString() === compName.trim()
+    );
+
+    if (!company) {
+      alert("Compagnie introuvable. Veuillez vérifier l'orthographe ou l'ID.");
+      return;
+    }
+
+    const cid = company.id;
+
+    if (!window.confirm(`Promouvoir cet utilisateur au rôle agent pour la compagnie ${company.nomCompagnie} (ID ${cid}) ?`)) return;
     try {
-      await adminService.promoteUserToAgent(userId);
+      await adminService.promoteUserToAgent(userId, { compagnieId: cid });
       await load();
     } catch (e) {
       alert(e?.response?.data?.message || e?.message || 'Action impossible.');

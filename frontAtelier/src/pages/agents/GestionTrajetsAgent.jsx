@@ -137,7 +137,7 @@ const GestionTrajetsAgent = () => {
     <LayoutAgent title="Trajets">
       <section className="space-y-4">
         <form onSubmit={onSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">CRUD trajets</h2>
+          <h2 className="text-base font-semibold text-slate-900">GESTION DES TRAJETS</h2>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <input

@@ -41,8 +41,8 @@ const EtoilesSVG = ({ note }) => {
                 pleine
                   ? "#FBBF24"
                   : demie
-                  ? `url(#demi-${i})`
-                  : "#D1D5DB"
+                    ? `url(#demi-${i})`
+                    : "#D1D5DB"
               }
               stroke={pleine || demie ? "#F59E0B" : "#9CA3AF"}
               strokeWidth="0.5"
@@ -145,7 +145,7 @@ const Accueil = () => {
           <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-accent rounded-full blur-3xl"></div>
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 flex flex-col lg:flex-row items-center relative z-10 gap-8 lg:gap-12">
           {/* TEXTE */}
           <div className="w-full lg:w-1/2 text-center lg:text-left order-2 lg:order-1">
@@ -157,15 +157,15 @@ const Accueil = () => {
               Réservez vos trajets en quelques secondes. Une plateforme sécurisée, fluide et pensée pour vous simplifier la vie.
             </p>
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 sm:gap-4">
-              <Link 
-                to="/connexion" 
+              <Link
+                to="/connexion"
                 className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-bleu-nuit rounded-xl font-bold hover:bg-gray-50 transition-all shadow-lg hover:shadow-2xl transform hover:scale-105"
                 aria-label="Se connecter à SmartTrip"
               >
                 Se Connecter
               </Link>
-              <Link 
-                to="/inscription" 
+              <Link
+                to="/inscription"
                 className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent text-white border-2 border-white rounded-xl font-bold hover:bg-white hover:text-bleu-nuit transition-all"
                 aria-label="Créer un compte SmartTrip"
               >
@@ -173,16 +173,16 @@ const Accueil = () => {
               </Link>
             </div>
           </div>
-          
+
           {/* IMAGE */}
           <div className="w-full lg:w-1/2 flex justify-center items-center order-1 lg:order-2">
             <div className="relative w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-cyan-accent/20 rounded-full blur-3xl animate-pulse"></div>
-              
+
               <div className="relative aspect-square rounded-full overflow-hidden shadow-2xl border-4 border-white/20 backdrop-blur-sm">
-                <img 
+                <img
                   src={busImage}
-                  alt="Bus moderne SmartTrip" 
+                  alt="Bus moderne SmartTrip"
                   className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
                   onError={(e) => {
                     console.error("Erreur de chargement de l'image");
@@ -191,10 +191,10 @@ const Accueil = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-bleu-secondaire/30 via-transparent to-white/10"></div>
               </div>
-              
+
               <div className="absolute -top-3 -left-3 sm:-top-5 sm:-left-5 w-12 h-12 sm:w-20 sm:h-20 bg-cyan-accent/40 rounded-full animate-pulse backdrop-blur-md"></div>
-              <div className="absolute -bottom-3 -right-3 sm:-bottom-5 sm:-right-5 w-16 h-16 sm:w-24 sm:h-24 bg-white/40 rounded-full animate-pulse backdrop-blur-md" style={{animationDelay: '0.7s'}}></div>
-              <div className="hidden lg:block absolute top-1/4 -right-8 w-16 h-16 bg-cyan-accent/30 rounded-full animate-pulse backdrop-blur-md" style={{animationDelay: '1.4s'}}></div>
+              <div className="absolute -bottom-3 -right-3 sm:-bottom-5 sm:-right-5 w-16 h-16 sm:w-24 sm:h-24 bg-white/40 rounded-full animate-pulse backdrop-blur-md" style={{ animationDelay: '0.7s' }}></div>
+              <div className="hidden lg:block absolute top-1/4 -right-8 w-16 h-16 bg-cyan-accent/30 rounded-full animate-pulse backdrop-blur-md" style={{ animationDelay: '1.4s' }}></div>
             </div>
           </div>
         </div>
@@ -287,14 +287,14 @@ const Accueil = () => {
           </h3>
           <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12">
             {partenaires.map((partenaire, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 aria-label={`Partenaire ${partenaire.nom}`}
               >
-                <img 
-                  src={partenaire.logo} 
-                  alt={`Logo ${partenaire.nom}`} 
+                <img
+                  src={partenaire.logo}
+                  alt={`Logo ${partenaire.nom}`}
                   className="h-8 sm:h-10 w-auto object-contain"
                 />
                 <span className="text-sm sm:text-base font-bold text-bleu-nuit">{partenaire.nom}</span>
@@ -314,7 +314,7 @@ const Accueil = () => {
             Réservez en tant que voyageur, ou connectez-vous à l’espace agent si votre organisation vous a créé un compte.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            
+
             {/* Client */}
             <div className="bg-gradient-to-br from-bleu-secondaire to-cyan-accent p-6 sm:p-8 rounded-3xl shadow-xl text-white flex flex-col justify-between transform hover:scale-105 transition-transform">
               <div>
@@ -338,8 +338,8 @@ const Accueil = () => {
                   </li>
                 </ul>
               </div>
-              <Link 
-                to="/inscription" 
+              <Link
+                to="/inscription"
                 className="w-full text-center py-3 sm:py-4 bg-white text-bleu-nuit rounded-xl font-bold hover:bg-gray-50 transition transform hover:scale-105 text-sm sm:text-base"
                 aria-label="Commencer mon voyage en tant que voyageur"
               >
@@ -372,8 +372,8 @@ const Accueil = () => {
                   </li>
                 </ul>
               </div>
-              <Link 
-                to="/espace-agent" 
+              <Link
+                to="/espace-agent"
                 className="w-full text-center py-3 sm:py-4 bg-cyan-accent text-bleu-nuit rounded-xl font-bold hover:bg-white transition transform hover:scale-105 text-sm sm:text-base"
                 aria-label="Informations espace agent et connexion"
               >
@@ -429,8 +429,8 @@ const Accueil = () => {
             <p className="text-sm sm:text-base text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">
               Rejoignez SmartTrip aujourd'hui et facilitez vos déplacements avec la plateforme de réservation la plus moderne.
             </p>
-            <Link 
-              to="/inscription" 
+            <Link
+              to="/inscription"
               className="inline-block px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-bleu-secondaire to-cyan-accent text-white rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transition-all transform hover:scale-105"
               aria-label="Créer un compte gratuitement"
             >

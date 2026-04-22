@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { trajetService, companyService } from '../../services/api';
 import LayoutClient from '../../components/LayoutClient';
 import TrajetCard from '../../components/TrajetCard';
@@ -27,6 +27,7 @@ function filtreTrajetsParCompagnie(trajets, compagnieId) {
 
 const Trajets = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [compagnies, setCompagnies] = useState([]);
   const [compagnieId, setCompagnieId] = useState('');
   const [trajets, setTrajets] = useState([]);
@@ -34,8 +35,9 @@ const Trajets = () => {
   const [chargementTrajets, setChargementTrajets] = useState(false);
   const [erreurCompagnies, setErreurCompagnies] = useState('');
   const [erreurTrajets, setErreurTrajets] = useState('');
-  const [filtreDepart, setFiltreDepart] = useState('');
-  const [filtreArrivee, setFiltreArrivee] = useState('');
+  const [filtreDepart, setFiltreDepart] = useState(searchParams.get('from') || '');
+  const [filtreArrivee, setFiltreArrivee] = useState(searchParams.get('to') || '');
+  const [filtreDate, setFiltreDate] = useState(searchParams.get('date') || '');
 
   useEffect(() => {
     let cancel = false;
@@ -137,7 +139,9 @@ const Trajets = () => {
       filtreDepart === '' || String(trajet.depart || '').toLowerCase().includes(filtreDepart.toLowerCase());
     const matchArrivee =
       filtreArrivee === '' || String(trajet.arrivee || '').toLowerCase().includes(filtreArrivee.toLowerCase());
-    return matchDepart && matchArrivee;
+    const matchDate =
+      filtreDate === '' || String(trajet.date || '').startsWith(filtreDate);
+    return matchDepart && matchArrivee && matchDate;
   });
 
   if (chargementCompagnies) {
@@ -200,7 +204,7 @@ const Trajets = () => {
 
           <div className="mb-8 rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm">
             <h3 className="mb-4 text-lg font-black text-slate-900">Rechercher un trajet</h3>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-700">Ville de départ</label>
                 <input
@@ -218,6 +222,15 @@ const Trajets = () => {
                   value={filtreArrivee}
                   onChange={(e) => setFiltreArrivee(e.target.value)}
                   placeholder="Ex. Yamoussoukro"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">Date de départ</label>
+                <input
+                  type="date"
+                  value={filtreDate}
+                  onChange={(e) => setFiltreDate(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>

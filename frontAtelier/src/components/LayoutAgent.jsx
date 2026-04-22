@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const navItems = [
   { to: '/agent/reservations', label: 'Réservations' },
@@ -10,6 +11,13 @@ const navItems = [
 
 const LayoutAgent = ({ title, children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/connexion');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -19,12 +27,20 @@ const LayoutAgent = ({ title, children }) => {
             <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Espace agent</p>
             <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
           </div>
-          <Link
-            to="/"
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Retour site
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Retour site
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="rounded-lg bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-100 transition"
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
       </header>
 

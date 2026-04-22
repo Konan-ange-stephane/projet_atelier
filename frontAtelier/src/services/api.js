@@ -531,9 +531,9 @@ export const adminService = {
     return unwrapList(data);
   },
 
-  promoteUserToAgent: async (userId) => {
+  promoteUserToAgent: async (userId, body) => {
     const uid = requirePathId(userId, 'userId');
-    const { data } = await api.put(`/admin/users/${uid}/role-agent`);
+    const { data } = await api.put(`/admin/users/${uid}/role-agent`, body);
     return data;
   },
 };
