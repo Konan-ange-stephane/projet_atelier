@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { Home } from 'lucide-react';
 
 const SidebarClient = ({ collapsed, setCollapsed, user, logout }) => {
   const location = useLocation();
@@ -160,8 +161,17 @@ const LayoutClient = ({ children, title, subtitle }) => {
               <p className="text-xs md:text-sm text-slate-500 font-medium truncate">{subtitle}</p>
             ) : null}
           </div>
-          <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md">
-            {user?.nom ? user.nom[0].toUpperCase() : 'U'}
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <Home size={14} />
+              Voir le site
+            </Link>
+            <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md">
+              {user?.nom ? user.nom[0].toUpperCase() : (user?.email ? user.email[0].toUpperCase() : 'U')}
+            </div>
           </div>
         </header>
 

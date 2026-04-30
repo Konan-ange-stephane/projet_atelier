@@ -12,6 +12,8 @@ import {
 import LayoutClient from '../../components/LayoutClient';
 import ReservationSummary from '../../components/ReservationSummary';
 import { reservationService, mapUiModeToApi, normalizeTripForUi } from '../../services/api';
+import { authService } from '../../services/serviceAuth';
+import PaymentSimulator from '../../components/PaymentSimulator';
 
 const modes = [
   {
@@ -40,14 +42,14 @@ const modes = [
 const Paiement = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const { reservation: resState, trajet: trajetState, placeId } = location.state || {};
   const trajet =
     trajetState ||
     (resState?.trip ? normalizeTripForUi(resState.trip) : null) ||
     (resState?.trajet ? normalizeTripForUi(resState.trajet) : null);
   const reservationId = resState?.id ?? resState?.reservationId;
-  
+
   const [methodePaiement, setMethodePaiement] = useState('');
   const [numeroTelephone, setNumeroTelephone] = useState('');
   const [numeroCarte, setNumeroCarte] = useState('');
@@ -56,6 +58,7 @@ const Paiement = () => {
   const [cvv, setCvv] = useState('');
   const [traitement, setTraitement] = useState(false);
   const [erreurPaiement, setErreurPaiement] = useState('');
+  const [showSimulator, setShowSimulator] = useState(false);
 
   if (!trajet || !reservationId) {
     return (
@@ -99,37 +102,50 @@ const Paiement = () => {
   const handlePaiement = async (e) => {
     e.preventDefault();
     setErreurPaiement('');
-    
+
     if (!methodePaiement) {
       setErreurPaiement('Veuillez sélectionner un mode de paiement.');
       return;
     }
 
+    if (methodePaiement === 'especes') {
+      setTraitement(true);
+      try {
+        await reservationService.effectuerPaiement(reservationId, {
+          modePaiement: 'ESPECES',
+        });
+        sessionStorage.setItem('smarttrip_paiement_ok', '1');
+        navigate('/client/mes-reservations');
+      } catch (err) {
+        setErreurPaiement(err?.response?.data?.message || err?.message || 'Erreur lors de l\'enregistrement.');
+      } finally {
+        setTraitement(false);
+      }
+      return;
+    }
+
+    // Simulation Interne au lieu de FedaPay
+    setShowSimulator(true);
+  };
+
+  const handleSimulationSuccess = async () => {
+    setShowSimulator(false);
     setTraitement(true);
     try {
       await reservationService.effectuerPaiement(reservationId, {
         modePaiement: mapUiModeToApi(methodePaiement),
       });
-      // Évite navigate(replace) + setState sur la page cible (race React 19 / removeChild)
-      try {
-        sessionStorage.setItem('smarttrip_paiement_ok', '1');
-      } catch {
-        /* quota / navigation privée */
-      }
+      sessionStorage.setItem('smarttrip_paiement_ok', '1');
       navigate('/client/mes-reservations');
     } catch (err) {
-      setErreurPaiement(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Le paiement n’a pas pu être enregistré. Vérifiez vos informations ou réessayez plus tard.'
-      );
+      setErreurPaiement("Paiement simulé réussi mais erreur lors de la confirmation : " + (err?.message || "Erreur inconnue"));
     } finally {
       setTraitement(false);
     }
   };
 
   return (
-    <LayoutClient 
+    <LayoutClient
       title="Paiement sécurisé"
       subtitle="Choisissez un mode de règlement pour confirmer votre réservation."
     >
@@ -140,13 +156,13 @@ const Paiement = () => {
         <div className="h-px flex-1 bg-slate-200" />
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
           2
-                    </div>
+        </div>
         <div className="min-w-0 flex-1 pl-2 text-xs text-slate-600 sm:text-sm">
           <span className="font-medium text-slate-400">Étape 1 · Réservation</span>
           <span className="mx-2 text-slate-300 hidden sm:inline">|</span>
           <span className="font-semibold text-slate-900">Étape 2 · Paiement</span>
-                    </div>
-                  </div>
+        </div>
+      </div>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
@@ -157,7 +173,7 @@ const Paiement = () => {
             >
               <AlertCircle className="h-5 w-5 shrink-0 text-red-600" strokeWidth={2} />
               <p>{erreurPaiement}</p>
-                    </div>
+            </div>
           )}
 
           <form onSubmit={handlePaiement} className="space-y-6">
@@ -174,18 +190,17 @@ const Paiement = () => {
                   return (
                     <label
                       key={id}
-                      className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-4 transition ${
-                        selected
-                          ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20'
-                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
-                      }`}
+                      className={`flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-4 transition ${selected
+                        ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-600/20'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                        }`}
                     >
-                  <input
-                    type="radio"
-                    name="methodePaiement"
+                      <input
+                        type="radio"
+                        name="methodePaiement"
                         value={id}
                         checked={selected}
-                    onChange={(e) => setMethodePaiement(e.target.value)}
+                        onChange={(e) => setMethodePaiement(e.target.value)}
                         className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
                       />
                       <div
@@ -195,12 +210,12 @@ const Paiement = () => {
                           className: 'h-6 w-6',
                           strokeWidth: 1.75,
                         })}
-                    </div>
+                      </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-slate-900">{title}</p>
                         <p className="text-sm text-slate-500">{description}</p>
-                  </div>
-                </label>
+                      </div>
+                    </label>
                   );
                 })}
               </div>
@@ -260,29 +275,29 @@ const Paiement = () => {
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm uppercase focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     />
                   </div>
-                    <div>
+                  <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Expiration</label>
-                      <input
-                        type="text"
-                        value={dateExpiration}
-                        onChange={(e) => setDateExpiration(e.target.value)}
-                        placeholder="MM/AA"
+                    <input
+                      type="text"
+                      value={dateExpiration}
+                      onChange={(e) => setDateExpiration(e.target.value)}
+                      placeholder="MM/AA"
                       maxLength={5}
-                        required
+                      required
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">CVV</label>
-                      <input
+                    <input
                       type="password"
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value)}
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
                       placeholder="•••"
                       maxLength={4}
-                        required
+                      required
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      />
+                    />
                   </div>
                 </div>
               </div>
@@ -343,6 +358,14 @@ const Paiement = () => {
           </div>
         </div>
       </div>
+
+      <PaymentSimulator
+        isOpen={showSimulator}
+        onClose={() => setShowSimulator(false)}
+        onSuccess={handleSimulationSuccess}
+        amount={trajet?.prix || 0}
+        method={methodePaiement === 'mobile' ? 'Mobile Money' : 'Carte Bancaire'}
+      />
     </LayoutClient>
   );
 };

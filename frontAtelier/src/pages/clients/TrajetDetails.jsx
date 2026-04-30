@@ -63,13 +63,12 @@ const VueSieges = ({ trajet, places, onRetour, onConfirmer, submitting }) => {
                   if (!place) return;
                   setPlaceIdSelectionne(selected ? null : place.id);
                 }}
-                className={`h-10 rounded-xl font-black text-xs transition-all border-2 ${
-                  selected
-                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200 scale-110'
-                    : !place || !dispo
-                      ? 'bg-slate-100 border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'bg-white border-slate-100 text-slate-600 hover:border-blue-300'
-                }`}
+                className={`h-10 rounded-xl font-black text-xs transition-all border-2 ${selected
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200 scale-110'
+                  : !place || !dispo
+                    ? 'bg-slate-100 border-slate-100 text-slate-300 cursor-not-allowed'
+                    : 'bg-white border-slate-100 text-slate-600 hover:border-blue-300'
+                  }`}
               >
                 {num}
               </button>
@@ -81,7 +80,7 @@ const VueSieges = ({ trajet, places, onRetour, onConfirmer, submitting }) => {
       <div className="fixed bottom-20 left-4 right-4 lg:relative lg:bottom-0 lg:left-0 lg:right-0 z-50">
         <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase">Place (API)</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Place </p>
             <p className="font-black text-lg">
               {placeIdSelectionne
                 ? `#${placeIdSelectionne}`
@@ -164,8 +163,8 @@ const TrajetDetails = () => {
     } catch (e) {
       setErreur(
         e?.response?.data?.message ||
-          e?.message ||
-          'La réservation a échoué. Réessayez ou choisissez une autre place.'
+        e?.message ||
+        'La réservation a échoué. Réessayez ou choisissez une autre place.'
       );
     } finally {
       setSubmitting(false);

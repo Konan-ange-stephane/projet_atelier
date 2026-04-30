@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { trajetService, companyService } from '../../services/api';
+import { trajetService, companyService, reservationService } from '../../services/api';
 import LayoutClient from '../../components/LayoutClient';
 import TrajetCard from '../../components/TrajetCard';
 import Chargeur from '../../components/Chargeur';
@@ -38,6 +38,15 @@ const Trajets = () => {
   const [filtreDepart, setFiltreDepart] = useState(searchParams.get('from') || '');
   const [filtreArrivee, setFiltreArrivee] = useState(searchParams.get('to') || '');
   const [filtreDate, setFiltreDate] = useState(searchParams.get('date') || '');
+
+  // États pour réservation directe
+  const [villeDepart, setVilleDepart] = useState('');
+  const [villeArrivee, setVilleArrivee] = useState('');
+  const [dateDepart, setDateDepart] = useState('');
+  const [chargementReservation, setChargementReservation] = useState(false);
+  const [erreurReservation, setErreurReservation] = useState('');
+
+
 
   useEffect(() => {
     let cancel = false;
@@ -134,6 +143,30 @@ const Trajets = () => {
     navigate(`/client/trajet/${trajetId}`);
   };
 
+  const handleReservationDirecte = async (e) => {
+    e.preventDefault();
+    setErreurReservation('');
+    setChargementReservation(true);
+
+    try {
+      const trip = await trajetService.findOrCreateTrip({
+        villeDepart,
+        villeArrivee,
+        dateDepart,
+        compagnieId,
+      });
+
+      // Rediriger vers la sélection de siège
+      navigate(`/client/trajet/${trip.id}`);
+    } catch (error) {
+      setErreurReservation(error?.response?.data?.message || error?.message || 'Aucun trajet trouvé pour ces critères.');
+    } finally {
+      setChargementReservation(false);
+    }
+  };
+
+
+
   const trajetsFiltres = trajets.filter((trajet) => {
     const matchDepart =
       filtreDepart === '' || String(trajet.depart || '').toLowerCase().includes(filtreDepart.toLowerCase());
@@ -186,6 +219,64 @@ const Trajets = () => {
           <p className="mt-2 text-xs text-slate-500">{compagnieChoisie.adresse}</p>
         ) : null}
       </div>
+
+      {/* Section Réservation Directe */}
+      <div className="mb-8 rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm">
+        <h3 className="mb-2 text-lg font-black text-slate-900">Réservation Directe</h3>
+        <p className="mb-4 text-sm text-slate-600">
+          Recherchez un trajet spécifique pour réserver immédiatement votre place.
+        </p>
+        <form onSubmit={handleReservationDirecte} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Ville de départ</label>
+              <input
+                type="text"
+                value={villeDepart}
+                onChange={(e) => setVilleDepart(e.target.value)}
+                placeholder="Ex: Paris"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Ville d'arrivée</label>
+              <input
+                type="text"
+                value={villeArrivee}
+                onChange={(e) => setVilleArrivee(e.target.value)}
+                placeholder="Ex: Lyon"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1">Date et heure de départ</label>
+              <input
+                type="datetime-local"
+                value={dateDepart}
+                onChange={(e) => setDateDepart(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+          </div>
+          {erreurReservation && (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              {erreurReservation}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={chargementReservation}
+            className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {chargementReservation ? 'Recherche en cours...' : 'Réserver maintenant'}
+          </button>
+        </form>
+      </div>
+
+
 
       {!compagnieId ? (
         <div className="rounded-[2rem] border border-slate-100 bg-white p-12 text-center shadow-sm">

@@ -79,11 +79,7 @@ const Accueil = () => {
   const [faqOuverte, setFaqOuverte] = useState(null);
   const [email, setEmail] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      naviguer(getPostLoginPath(user.role));
-    }
-  }, [user, naviguer]);
+  // Redirection supprimée pour permettre aux clients connectés de voir la page d'accueil
 
   const basculerFaq = (index) => {
     setFaqOuverte(faqOuverte === index ? null : index);

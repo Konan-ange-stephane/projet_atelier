@@ -9,6 +9,8 @@ import Accueil from '../pages/Accueil';
 import Connexion from '../pages/Connexion';
 import Inscription from '../pages/Inscription';
 import EspaceAgent from '../pages/EspaceAgent';
+import MotDePasseOublie from '../pages/MotDePasseOublie';
+import ReinitialiserMotDePasse from '../pages/ReinitialiserMotDePasse';
 
 // Pages client
 import ClientRoutes from "./ClientRoutes";
@@ -34,6 +36,8 @@ const AppRoutes = () => (
     <Route path="/connexion" element={<Connexion />} />
     <Route path="/inscription" element={<Inscription />} />
     <Route path="/espace-agent" element={<EspaceAgent />} />
+    <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+    <Route path="/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
 
     {/* Toutes les routes client sous /client/* */}
     <Route

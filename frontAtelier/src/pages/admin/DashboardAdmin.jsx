@@ -6,6 +6,7 @@ const EMPTY_FORM = {
   nomCompagnie: '',
   adresse: '',
   telephone: '',
+  rccm: '',
 };
 
 const DashboardAdmin = () => {
@@ -55,6 +56,7 @@ const DashboardAdmin = () => {
         nomCompagnie: form.nomCompagnie.trim(),
         adresse: form.adresse.trim(),
         telephone: form.telephone.trim(),
+        rccm: form.rccm.trim(),
       });
       setForm(EMPTY_FORM);
       await loadData();
@@ -106,6 +108,12 @@ const DashboardAdmin = () => {
               placeholder="Téléphone (ex. 0102030405)"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             />
+            <input
+              value={form.rccm}
+              onChange={(e) => setForm((prev) => ({ ...prev, rccm: e.target.value }))}
+              placeholder="RCCM (Optionnel)"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
           </div>
 
           <button
@@ -132,6 +140,7 @@ const DashboardAdmin = () => {
                   <p className="font-medium text-slate-900">{c.nomCompagnie || '-'}</p>
                   <p className="text-sm text-slate-500">{c.adresse || '—'}</p>
                   <p className="text-sm text-slate-500">{c.telephone || '—'}</p>
+                  {c.rccm && <p className="text-xs text-slate-400">RCCM: {c.rccm}</p>}
                 </li>
               ))}
             </ul>

@@ -90,13 +90,12 @@ const Connexion = () => {
                     <label className="block text-sm font-semibold text-gray-700">
                       Mot de passe <span className="text-red-500">*</span>
                     </label>
-                    <button
-                      type="button"
+                    <Link
+                      to="/mot-de-passe-oublie"
                       className="text-xs text-bleu-secondaire hover:underline font-medium"
-                      onClick={() => alert('Fonctionnalité à venir')}
                     >
                       Mot de passe oublié ?
-                    </button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">

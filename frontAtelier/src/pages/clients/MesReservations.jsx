@@ -71,7 +71,12 @@ function TicketModal({ reservation, onFermer }) {
             <p id="ticket-title" className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
               Document de voyage
             </p>
-            <h3 className="mt-2 text-lg font-semibold leading-snug">{reservation.trajet}</h3>
+            <h3 className="mt-2 text-lg font-semibold leading-snug">
+              {reservation.trajet}
+              {reservation.heure && reservation.heure !== '—' && (
+                <span className="ml-2 text-indigo-300">({reservation.heure})</span>
+              )}
+            </h3>
           </div>
 
           <div className="flex items-center bg-slate-50 px-4">
@@ -310,6 +315,9 @@ const MesReservations = () => {
                         <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" strokeWidth={2} />
                         <span className="leading-snug">
                           {r.trajet}
+                          {r.heure && r.heure !== '—' && (
+                            <span className="ml-2 text-indigo-600">({r.heure})</span>
+                          )}
                           {r.compagnie ? (
                             <span className="mt-0.5 block text-xs font-normal text-slate-500">{r.compagnie}</span>
                           ) : null}

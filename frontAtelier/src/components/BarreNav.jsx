@@ -62,9 +62,21 @@ const BarreNav = () => {
                 </Link>
               </>
             ) : (
-              <Link to="/connexion" className="text-sm font-bold text-slate-600 hover:text-indigo-600">
-                Mon compte
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link to="/connexion" className="flex items-center gap-2 group">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-105 transition-transform">
+                    {(user.nom || user.email || '?')[0].toUpperCase()}
+                  </div>
+                  <div className="hidden lg:block text-left">
+                    <div className="text-xs font-black text-slate-900 leading-none mb-0.5">
+                      {user.nom || user.email?.split('@')[0]}
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                      {role === 'CLIENT' ? 'Voyageur' : role}
+                    </div>
+                  </div>
+                </Link>
+              </div>
             )}
           </div>
         </div>

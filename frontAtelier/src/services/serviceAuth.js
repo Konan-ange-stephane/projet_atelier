@@ -6,6 +6,7 @@ const USE_MOCK = import.meta.env.VITE_AUTH_MOCK === 'true';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,7 +17,9 @@ api.interceptors.request.use(
     const path = config.url || '';
     const publicAuth =
       path.includes('/auth/login') ||
-      path.includes('/auth/register');
+      path.includes('/auth/register') ||
+      path.includes('/auth/forgot-password') ||
+      path.includes('/auth/reset-password');
     if (!publicAuth) {
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {
@@ -32,8 +35,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const path = error.config?.url || '';
+      const isTripCreation = path.includes('/trips') && error.config?.method === 'post';
+      const isPayment = path.includes('/payment') && error.config?.method === 'post';
       const onLoginPage = window.location.pathname.startsWith('/connexion');
-      if (!onLoginPage) {
+      if (!onLoginPage && !isTripCreation && !isPayment) {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
         window.location.href = '/connexion';
@@ -377,6 +383,20 @@ export const authService = {
     }
     const path = import.meta.env.VITE_AUTH_CHANGE_PASSWORD_PATH || '/auth/change-password';
     await api.post(path, { currentPassword, newPassword });
+  },
+  forgotPassword: async (email) => {
+    if (USE_MOCK) {
+      await delay(500);
+      return;
+    }
+    await api.post('/auth/forgot-password', { email });
+  },
+  resetPassword: async (token, newPassword) => {
+    if (USE_MOCK) {
+      await delay(500);
+      return;
+    }
+    await api.post('/auth/reset-password', { token, newPassword });
   },
 
   login: async (credentials) => {

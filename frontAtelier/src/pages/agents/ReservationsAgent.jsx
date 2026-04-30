@@ -82,51 +82,58 @@ const ReservationsAgent = () => {
                   const rid = agentReservationRowId(r) ?? r.id;
                   const hasId = rid != null && String(rid).trim() !== '';
                   return (
-                  <tr key={hasId ? String(rid) : `row-${idx}`}>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600">#{hasId ? rid : '—'}</td>
-                    <td className="px-4 py-3 text-slate-700">{r.tripId ?? r.trip?.id ?? '-'}</td>
-                    <td className="px-4 py-3 text-slate-700">
-                      {r.client?.nom || r.client?.name || r.user?.email || '-'}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">
-                      {r.montant != null ? Number(r.montant).toLocaleString('fr-FR') : '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${badgeClass(r.statut || r.status)}`}>
-                        {r.statut || r.status || 'EN_ATTENTE'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        {hasId ? (
-                          <Link
-                            to={`/agent/reservations/${rid}`}
-                            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    <tr key={hasId ? String(rid) : `row-${idx}`}>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-600">#{hasId ? rid : '—'}</td>
+                      <td className="px-4 py-3 text-slate-700">{r.tripId ?? r.trip?.id ?? '-'}</td>
+                      <td className="px-4 py-3 text-slate-700">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{r.clientName || '-'}</span>
+                          <span className="text-xs text-slate-500">{r.clientEmail}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-slate-700">
+                        {r.montant != null ? Number(r.montant).toLocaleString('fr-FR') : '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${badgeClass(r.statut || r.status)}`}>
+                          {r.statut || r.status || 'EN_ATTENTE'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          {hasId ? (
+                            <Link
+                              to={`/agent/reservations/${rid}`}
+                              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                            >
+                              Detail
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-amber-600">ID manquant</span>
+                          )}
+                          <button
+                            type="button"
+                            disabled={!hasId || r.statut === 'CONFIRMEE' || r.status === 'CONFIRMEE'}
+                            onClick={() => onValidate(rid)}
+                            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium text-white transition-colors ${
+                              (r.statut === 'CONFIRMEE' || r.status === 'CONFIRMEE')
+                                ? 'bg-slate-400 cursor-not-allowed'
+                                : 'bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40'
+                            }`}
                           >
-                            Detail
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-amber-600">ID manquant</span>
-                        )}
-                        <button
-                          type="button"
-                          disabled={!hasId}
-                          onClick={() => onValidate(rid)}
-                          className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-40"
-                        >
-                          Valider
-                        </button>
-                        <button
-                          type="button"
-                          disabled={!hasId}
-                          onClick={() => onReject(rid)}
-                          className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-40"
-                        >
-                          Rejeter
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                            {(r.statut === 'CONFIRMEE' || r.status === 'CONFIRMEE') ? 'Confirmé' : 'Valider'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!hasId || r.statut === 'ANNULEE' || r.status === 'ANNULEE'}
+                            onClick={() => onReject(rid)}
+                            className="rounded-lg bg-rose-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-40"
+                          >
+                            Rejeter
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>

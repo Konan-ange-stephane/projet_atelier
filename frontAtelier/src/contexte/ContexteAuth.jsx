@@ -6,7 +6,10 @@ import { USER_KEY } from '../config';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem(USER_KEY);
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,9 +24,11 @@ export const AuthProvider = ({ children }) => {
       try {
         const me = await authService.fetchCurrentUser();
         if (!cancelled) setUser(me);
-      } catch {
-        authService.clearLocalSession();
-        if (!cancelled) setUser(null);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          authService.clearLocalSession();
+          if (!cancelled) setUser(null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -65,6 +70,30 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      await authService.forgotPassword(email);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: extractErrorMessage(error),
+      };
+    }
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    try {
+      await authService.resetPassword(token, newPassword);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: extractErrorMessage(error),
+      };
+    }
+  };
+
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
@@ -76,6 +105,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    forgotPassword,
+    resetPassword,
     isAuthenticated: !!user,
     loading,
   };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { Home, LogOut } from 'lucide-react';
 
 const navItems = [
   { to: '/agent/reservations', label: 'Réservations' },
@@ -30,9 +31,10 @@ const LayoutAgent = ({ title, children }) => {
           <div className="flex items-center gap-3">
             <Link
               to="/"
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              Retour site
+              <Home size={16} />
+              Retour au site
             </Link>
             <button
               onClick={handleLogout}

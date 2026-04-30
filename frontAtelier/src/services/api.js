@@ -83,8 +83,8 @@ export function normalizeTripForUi(raw) {
     depart: t.depart ?? t.villeDepart ?? t.departureCity ?? t.origine ?? '',
     arrivee: t.arrivee ?? t.villeArrivee ?? t.arrivalCity ?? t.destination ?? '',
     date: String(t.date ?? t.dateDepart ?? t.departureDate ?? '').slice(0, 10),
-    heure: t.heure ?? t.heureDepart ?? t.departureTime ?? '',
-    heureDepart: t.heureDepart ?? t.heure ?? t.departureTime ?? '',
+    heure: t.heure ?? t.heureDepart ?? t.departureTime ?? (String(t.dateDepart || '').includes('T') ? String(t.dateDepart).split('T')[1].slice(0, 5) : ''),
+    heureDepart: t.heureDepart ?? t.heure ?? t.departureTime ?? (String(t.dateDepart || '').includes('T') ? String(t.dateDepart).split('T')[1].slice(0, 5) : ''),
     heureArrivee: t.heureArrivee ?? t.heureArriveePrevue ?? '',
     prix: (() => {
       const v = t.prix ?? t.price ?? t.montant ?? t.amount ?? t.total;
@@ -195,12 +195,17 @@ export function normalizeVehicleForUi(raw) {
 export function statutReservationVersUi(apiStatut, paiements = []) {
   const s = (apiStatut ?? '').toString().toUpperCase();
   if (s.includes('ANNULE')) return 'Annulée';
-  const paye = paiements.some((p) =>
-    (p.statut ?? p.status ?? '').toString().toUpperCase().includes('PAYE')
-  );
-  if (paye || s.includes('PAYE') || s.includes('CONFIRME')) return 'Confirmée';
+  
+  // On ne se base plus uniquement sur les paiements pour dire "Confirmée".
+  // C'est l'agent qui confirme la réservation (statut CONFIRMEE).
+  if (s.includes('CONFIRME')) return 'Confirmée';
+  
   if (s.includes('ATTENTE') || s.includes('EN_ATTENTE')) return 'En attente';
   if (s.includes('TERMINE')) return 'Terminée';
+  
+  // Fallback : si un paiement est déjà encaissé, on peut quand même l'afficher comme confirmée 
+  // pour le client, sauf si l'utilisateur a explicitement demandé le contrôle agent.
+  // Ici, on suit la demande : "c'est l'agent qui confirme".
   return apiStatut || 'En attente';
 }
 
@@ -328,6 +333,7 @@ export function normalizeReservationListItem(r) {
     tNorm?.date ??
       trip.dateDepart ??
       trip.date ??
+      r.dateDepartTrip ??
       r.dateDepart ??
       r.dateReservation ??
       r.dateReservationDepart ??
@@ -343,9 +349,11 @@ export function normalizeReservationListItem(r) {
     r.heureDepart ??
     r.heureReservation ??
     r.heure ??
-    '';
+    (String(trip.dateDepart || r.dateDepartTrip || r.dateDepart || '').includes('T') 
+      ? String(trip.dateDepart || r.dateDepartTrip || r.dateDepart).split('T')[1].slice(0, 5) 
+      : '');
   const heureStr = String(heureRaw || '');
-  const heure = heureStr.length >= 5 ? heureStr.slice(0, 5) : heureStr || '—';
+  const heure = heureStr.length >= 5 ? heureStr.slice(0, 5) : (heureStr && heureStr !== 'null' ? heureStr : '—');
 
   const siege =
     place.numero ??
@@ -456,6 +464,12 @@ export const trajetService = {
     return unwrapList(data)
       .map(normalizePlaceForUi)
       .filter(Boolean);
+  },
+
+  findOrCreateTrip: async ({ villeDepart, villeArrivee, dateDepart, compagnieId }) => {
+    // On repasse en POST pour que le serveur puisse créer le trajet s'il n'existe pas.
+    const { data } = await api.post('/trips', { villeDepart, villeArrivee, dateDepart, compagnieId });
+    return normalizeTripForUi(data);
   },
 };
 

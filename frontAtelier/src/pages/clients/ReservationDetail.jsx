@@ -183,7 +183,12 @@ const ReservationDetail = () => {
                 <div className="min-w-0">
                   <h2 className="flex items-start gap-2 text-lg font-semibold text-slate-900 md:text-xl">
                     <MapPin className="mt-1 h-5 w-5 shrink-0 text-indigo-500" strokeWidth={2} />
-                    <span className="leading-snug">{ligne.trajet}</span>
+                    <span className="leading-snug">
+                      {ligne.trajet}
+                      {ligne.heure && ligne.heure !== '—' && (
+                        <span className="ml-2 text-indigo-600">({ligne.heure})</span>
+                      )}
+                    </span>
                   </h2>
                   {ligne.compagnie ? (
                     <p className="mt-2 flex items-center gap-2 text-sm text-slate-600">
